@@ -1,66 +1,166 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Play Before The Silence</title>
     <style>
+        /* Tło i ogólny układ */
         body {
-            background-color: #050505;
-            color: #d1d1d1;
-            font-family: 'Courier New', Courier, monospace; /* Klimatyczna czcionka maszynowa */
+            background-color: #020202;
+            color: #c4c4c4;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            overflow: hidden;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
-            margin: 0;
-            overflow: hidden;
             text-align: center;
+            position: relative;
         }
+
+        /* Pikselowy śnieg w tle (Nearest Neighbor) */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        /* Filtr starego monitora kineskopowego CRT */
+        .crt-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.04), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.04));
+            background-size: 100% 4px, 6px 100%;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        /* Delikatne migotanie ekranu */
+        @keyframes flicker {
+            0% { opacity: 0.98; }
+            50% { opacity: 1; }
+            100% { opacity: 0.99; }
+        }
+
         .container {
-            max-width: 600px;
-            padding: 20px;
+            max-width: 650px;
+            padding: 30px;
+            z-index: 2;
+            position: relative;
+            animation: flicker 0.15s infinite;
         }
+
+        /* Krwistoczerwony nagłówek */
         h1 {
-            font-size: 2.5rem;
-            color: #8b0000; /* Mroczna, głęboka czerwień */
+            font-size: 2.8rem;
+            color: #990000;
             text-transform: uppercase;
-            letter-spacing: 4px;
-            margin-bottom: 15px;
-            text-shadow: 2px 2px 4px #000;
+            letter-spacing: 6px;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 0px #000;
         }
+
         p {
-            font-size: 1rem;
-            line-height: 1.6;
-            margin-bottom: 30px;
-            color: #888;
+            font-size: 0.95rem;
+            line-height: 1.8;
+            margin-bottom: 40px;
+            color: #7a7a7a;
+            text-shadow: 1px 1px 2px #000;
         }
+
         .form-container {
-            background: #111;
-            border: 1px solid #222;
-            padding: 25px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.7);
+            background: rgba(10, 10, 10, 0.85);
+            border: 1px solid #330000;
+            padding: 30px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.9);
         }
+
         .placeholder-box {
-            border: 1px dashed #8b0000;
-            padding: 20px;
-            color: #8b0000;
+            border: 1px dashed #550000;
+            padding: 25px;
+            color: #660000;
             font-weight: bold;
+            font-size: 0.85rem;
+            letter-spacing: 2px;
         }
     </style>
 </head>
 <body>
+
+    <canvas id="snowCanvas"></canvas>
+    <div class="crt-overlay"></div>
+
     <div class="container">
         <h1>Before the Silence</h1>
-        <p>Niepokojący retro horror psychologiczny w stylu PS1. Ciemność, duszna mgła i sekrety, których nikt nie miał odkryć. Demo nadchodzi. Zapisz się, aby otrzymać klucz do zamkniętych testów.</p>
+        <p>A disturbing psychological retro horror in the style of PS1. Darkness, choking fog, and secrets that were never meant to be uncovered. Demo is coming. Sign up to get a key for the closed playtests.</p>
         
         <div class="form-container">
-            <!-- TUTAJ W PRZYSZŁOŚCI WKLEIMY KOD FORMULARZA Z MAILERLITE -->
             <div class="placeholder-box">
-                [TUTAJ BĘDZIE TWÓJ FORMULARZ ZAPISU MAILERLITE]
+                [ PLAYER REGISTRATION SYSTEM - SECURE CONNECTION ]
             </div>
         </div>
     </div>
+
+    <!-- Skrypt generujący ostry, pikselowy śnieg -->
+    <script>
+        const canvas = document.getElementById('snowCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Celowo niska rozdzielczość dla ostrej pikselozy
+        const retroWidth = 320;
+        const retroHeight = 240;
+        canvas.width = retroWidth;
+        canvas.height = retroHeight;
+
+        const numFlakes = 60;
+        const flakes = [];
+
+        for (let i = 0; i < numFlakes; i++) {
+            flakes.push({
+                x: Math.random() * retroWidth,
+                y: Math.random() * retroHeight,
+                size: Math.random() < 0.2 ? 2 : 1, // Piksele 1x1 lub 2x2
+                speed: Math.random() * 0.5 + 0.2,
+                drift: Math.random() * 0.3 - 0.15
+            });
+        }
+
+        function draw() {
+            ctx.fillStyle = '#020202';
+            ctx.fillRect(0, 0, retroWidth, retroHeight);
+
+            ctx.fillStyle = 'rgba(150, 150, 150, 0.75)';
+
+            for (let i = 0; i < numFlakes; i++) {
+                const f = flakes[i];
+                ctx.fillRect(Math.floor(f.x), Math.floor(f.y), f.size, f.size);
+
+                f.y += f.speed;
+                f.x += f.drift;
+
+                if (f.y > retroHeight) {
+                    flakes[i].y = -5;
+                    flakes[i].x = Math.random() * retroWidth;
+                }
+                if (f.x > retroWidth) f.x = 0;
+                if (f.x < 0) f.x = retroWidth;
+            }
+
+            requestAnimationFrame(draw);
+        }
+
+        draw();
+    </script>
 </body>
 </html>
