@@ -6,8 +6,9 @@
     <title>Play Before The Silence</title>
     <style>
         body {
-            background-color: #020202;
-            color: #c4c4c4;
+            background: #020202 url('background.png') no-repeat center center;
+            background-size: cover;
+            color: #ffffff;
             font-family: 'Courier New', Courier, monospace;
             margin: 0;
             overflow: hidden;
@@ -17,38 +18,51 @@
             height: 100vh;
             text-align: center;
             position: relative;
+            
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
         }
 
-        /* Przełącznik języków w rogu */
+        /* Przełącznik języków */
         .language-switcher {
             position: absolute;
             top: 25px;
             right: 25px;
             z-index: 10;
             display: flex;
-            gap: 15px;
+            gap: 10px;
+            background: rgba(5, 5, 5, 0.85);
+            border: 1px solid #990000;
+            padding: 6px 12px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.9);
         }
 
         .lang-btn {
-            color: #444;
+            color: #cccccc;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: bold;
-            letter-spacing: 1px;
-            transition: color 0.2s ease;
+            letter-spacing: 2px;
+            transition: all 0.2s ease;
             user-select: none;
+            padding: 3px 8px;
+            border: 1px solid transparent;
         }
 
         .lang-btn:hover {
-            color: #8b0000;
+            color: #ff3333;
+            border-color: #990000;
+            background: rgba(139, 0, 0, 0.15);
         }
 
         .lang-btn.active {
-            color: #990000;
-            text-shadow: 0 0 5px rgba(153, 0, 0, 0.6);
+            color: #ff3333;
+            text-shadow: 0 0 8px rgba(255, 51, 51, 0.8);
+            border-color: #ff3333;
+            background: rgba(139, 0, 0, 0.1);
         }
 
-        /* Pikselowy canvas na pełny ekran (Nearest Neighbor) */
+        /* Canvas ze śniegiem */
         canvas {
             position: absolute;
             top: 0;
@@ -56,11 +70,10 @@
             width: 100%;
             height: 100%;
             z-index: 1;
-            image-rendering: pixelated;
-            image-rendering: crisp-edges;
+            pointer-events: none;
         }
 
-        /* Filtr kineskopu CRT */
+        /* Filtr CRT */
         .crt-overlay {
             position: absolute;
             top: 0;
@@ -70,7 +83,7 @@
             background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%), 
                         linear-gradient(90deg, rgba(255, 0, 0, 0.04), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.04));
             background-size: 100% 4px, 6px 100%;
-            z-index: 3;
+            z-index: 2;
             pointer-events: none;
         }
 
@@ -80,17 +93,18 @@
             100% { opacity: 0.99; }
         }
 
+        /* Kontener główny */
         .container {
             max-width: 650px;
             padding: 30px;
-            z-index: 2;
+            z-index: 4;
             position: relative;
             animation: flicker 0.15s infinite;
         }
 
         h1 {
             font-size: 2.8rem;
-            color: #990000;
+            color: #e60000;
             text-transform: uppercase;
             letter-spacing: 6px;
             margin-bottom: 20px;
@@ -100,25 +114,128 @@
         p {
             font-size: 0.95rem;
             line-height: 1.8;
-            margin-bottom: 40px;
-            color: #7a7a7a;
-            text-shadow: 1px 1px 2px #000;
+            margin-bottom: 30px;
+            color: #f5f5f5; 
+            text-shadow: 2px 2px 4px #000;
         }
 
+        /* Mroczny formularz retro */
         .form-container {
-            background: rgba(10, 10, 10, 0.85);
-            border: 1px solid #330000;
+            background: rgba(10, 10, 10, 0.9);
+            border: 1px solid #550000;
             padding: 30px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.9);
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.95);
+            text-align: left;
+            position: relative;
         }
 
-        .placeholder-box {
-            border: 1px dashed #550000;
-            padding: 25px;
-            color: #660000;
-            font-weight: bold;
-            font-size: 0.85rem;
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.8rem;
+            color: #ff5555;
+            text-transform: uppercase;
+            margin-bottom: 8px;
             letter-spacing: 2px;
+            font-weight: bold;
+        }
+
+        .input-email {
+            width: 100%;
+            padding: 12px;
+            background: #050505;
+            border: 1px solid #880000;
+            color: #ffffff;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        .input-email:focus {
+            outline: none;
+            border-color: #ff3333;
+            box-shadow: 0 0 8px rgba(255, 51, 51, 0.5);
+        }
+
+        /* Zgoda (Checkbox i RODO) */
+        .consent-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .checkbox-custom {
+            margin-top: 4px;
+            cursor: pointer;
+            accent-color: #ff3333;
+            width: 18px;
+            height: 18px;
+        }
+
+        .consent-text {
+            font-size: 0.72rem;
+            line-height: 1.5;
+            color: #bbbbbb;
+            user-select: none;
+            cursor: pointer;
+        }
+
+        /* Przycisk wysyłki retro */
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: #880000;
+            border: 1px solid #ff3333;
+            color: #ffffff;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 0 10px rgba(136, 0, 0, 0.4);
+        }
+
+        .submit-btn:hover {
+            background: #ff3333;
+            box-shadow: 0 0 15px rgba(255, 51, 51, 0.8);
+            color: #000000;
+        }
+
+        .submit-btn:disabled {
+            background: #440000;
+            border-color: #550000;
+            color: #888888;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* Sekcja podziękowania po zapisie */
+        .success-container {
+            display: none;
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .success-title {
+            color: #ff3333;
+            font-size: 1.6rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 0px #000;
+        }
+
+        .success-text {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #cccccc;
         }
     </style>
 </head>
@@ -135,92 +252,179 @@
     <div class="container">
         <h1>Before the Silence</h1>
         
-        <p id="text-en">A disturbing psychological retro horror in the style of PS1. Darkness, choking fog, and secrets that were never meant to be uncovered. Demo is coming. Sign up to get a key for the closed playtests.</p>
-        <p id="text-pl" style="display: none;">Niepokojący retro horror psychologiczny w stylu PS1. Ciemność, duszna mgła i sekrety, których nikt nie miał odkryć. Demo nadchodzi. Zapisz się, aby otrzymać klucz do zamkniętych testów.</p>
+        <p id="text-en">A disturbing psychological retro thriller in the style of PS1. Darkness, choking fog, and secrets that were never meant to be uncovered. Demo is coming. Sign up to get a key for the closed playtests.</p>
+        <p id="text-pl" style="display: none;">Niepokojący retro thriller psychologiczny w stylu PS1. Ciemność, duszna mgła i sekrety, których nikt nie miał odkryć. Demo nadchodzi. Zapisz się, aby otrzymać klucz do zamkniętych testów.</p>
         
         <div class="form-container">
-            <div id="box-en" class="placeholder-box">
-                [ PLAYER REGISTRATION SYSTEM - SECURE CONNECTION ]
-            </div>
-            <div id="box-pl" class="placeholder-box" style="display: none;">
-                [ SYSTEM REJESTRACJI GRACZY - BEZPIECZNE POŁĄCZENIE ]
+            <!-- Formularz zapisu -->
+            <form action="https://assets.mailerlite.com/jsonp/976090/forms/192995024514843667/subscribe" method="POST" id="signup-form">
+                
+                <!-- PUŁAPKA HONEYPOT: Całkowicie niewidoczna dla ludzi, boty ją wypełnią -->
+                <div style="display: none !important;">
+                    <input type="text" name="website" id="honeypot_field" tabindex="-1" autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label id="label-email-en" for="email">Enter your e-mail address:</label>
+                    <label id="label-email-pl" for="email" style="display: none;">Wpisz swój adres e-mail:</label>
+                    <input type="email" id="email" name="fields[email]" class="input-email" placeholder="player@silence.com" required autocomplete="email">
+                </div>
+
+                <div class="consent-group">
+                    <input type="checkbox" id="consent" name="consent" class="checkbox-custom" required>
+                    <label for="consent" class="consent-text">
+                        <span id="consent-en">I agree to receive weekly development updates, secrets, and exclusive closed playtest keys for "Before the Silence". I can unsubscribe at any time.</span>
+                        <span id="consent-pl" style="display: none;">Wyrażam zgodę na otrzymywanie cotygodniowych aktualizacji z produkcji, sekretów oraz ekskluzywnych kluczy do zamkniętych testów gry "Before the Silence". Mogę się wypisać w każdej chwili.</span>
+                    </label>
+                </div>
+
+                <input type="hidden" name="ml-submit" value="1">
+                <input type="hidden" name="anticsrf" value="true">
+
+                <button type="submit" class="submit-btn" id="submit-button">
+                    <span id="btn-text-en">Join the Playtests</span>
+                    <span id="btn-text-pl" style="display: none;">Dołącz do testów</span>
+                </button>
+            </form>
+
+            <!-- Ekran sukcesu -->
+            <div id="success-message" class="success-container">
+                <div class="success-title" id="success-title-text">Welcome to the fog</div>
+                <div class="success-text" id="success-desc-text">You have successfully joined the playtest list. Watch your inbox for incoming secrets...</div>
             </div>
         </div>
     </div>
 
     <script>
+        // Oficjalne i bezpośrednie linki wysyłki z Twoich formularzy MailerLite
+        const ACTION_EN = "https://assets.mailerlite.com/jsonp/976090/forms/192995024514843667/subscribe";
+        const ACTION_PL = "https://assets.mailerlite.com/jsonp/976090/forms/192994438696404880/subscribe";
+        
+        let currentLang = 'en';
+
+        // Funkcja przełączania języków na stronie
         function setLanguage(lang) {
+            currentLang = lang;
             document.getElementById('btn-pl').classList.toggle('active', lang === 'pl');
             document.getElementById('btn-en').classList.toggle('active', lang === 'en');
 
+            // Teksty główne
             document.getElementById('text-pl').style.display = lang === 'pl' ? 'block' : 'none';
             document.getElementById('text-en').style.display = lang === 'en' ? 'block' : 'none';
 
-            document.getElementById('box-pl').style.display = lang === 'pl' ? 'block' : 'none';
-            document.getElementById('box-en').style.display = lang === 'en' ? 'block' : 'none';
+            // Etykiety pól
+            document.getElementById('label-email-pl').style.display = lang === 'pl' ? 'block' : 'none';
+            document.getElementById('label-email-en').style.display = lang === 'en' ? 'block' : 'none';
+
+            // Zgody prawne
+            document.getElementById('consent-pl').style.display = lang === 'pl' ? 'inline' : 'none';
+            document.getElementById('consent-en').style.display = lang === 'en' ? 'inline' : 'none';
+
+            // Tekst na przycisku
+            document.getElementById('btn-text-pl').style.display = lang === 'pl' ? 'block' : 'none';
+            document.getElementById('btn-text-en').style.display = lang === 'en' ? 'block' : 'none';
+
+            // Dynamiczna zmiana celu wysyłki MailerLite
+            const form = document.getElementById('signup-form');
+            form.action = lang === 'pl' ? ACTION_PL : ACTION_EN;
         }
+
+        // Integracja wysyłki z wykrywaniem botów (Honeypot)
+        document.getElementById('signup-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const form = e.target;
+            const submitBtn = document.getElementById('submit-button');
+            const successBox = document.getElementById('success-message');
+            
+            // 1. Sprawdzamy pułapkę Honeypot
+            const honeypot = document.getElementById('honeypot_field').value;
+            
+            if (honeypot !== "") {
+                console.warn("Spam-bot detected! Aborting transmission.");
+                // Oszukujemy bota - chowamy form, pokazujemy sukces, ale NIC nie wysyłamy do bazy
+                form.style.display = 'none';
+                
+                if (currentLang === 'pl') {
+                    document.getElementById('success-title-text').textContent = "Witaj we mgle";
+                    document.getElementById('success-desc-text').textContent = "Pomyślnie dołączyłeś do listy testerów. Obserwuj swoją skrzynkę, wkrótce wyślemy pierwsze tajemnice...";
+                } else {
+                    document.getElementById('success-title-text').textContent = "Welcome to the fog";
+                    document.getElementById('success-desc-text').textContent = "You have successfully joined the playtest list. Watch your inbox for incoming secrets...";
+                }
+                successBox.style.display = 'block';
+                return;
+            }
+
+            // 2. To jest człowiek -> puszczamy wysyłkę do MailerLite
+            submitBtn.disabled = true;
+            if (currentLang === 'pl') {
+                document.getElementById('btn-text-pl').textContent = "Wysyłanie...";
+            } else {
+                document.getElementById('btn-text-en').textContent = "Sending...";
+            }
+
+            const formData = new FormData(form);
+            
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                mode: 'no-cors' // Pozwala ominąć politykę CORS przy bezpośrednim uderzeniu do JSONP w MailerLite
+            })
+            .then(() => {
+                form.style.display = 'none';
+                
+                if (currentLang === 'pl') {
+                    document.getElementById('success-title-text').textContent = "Witaj we mgle";
+                    document.getElementById('success-desc-text').textContent = "Pomyślnie dołączyłeś do listy testerów. Obserwuj swoją skrzynkę, wkrótce wyślemy pierwsze tajemnice...";
+                } else {
+                    document.getElementById('success-title-text').textContent = "Welcome to the fog";
+                    document.getElementById('success-desc-text').textContent = "You have successfully joined the playtest list. Watch your inbox for incoming secrets...";
+                }
+                
+                successBox.style.display = 'block';
+            })
+            .catch(err => {
+                console.error("Transmission error:", err);
+                submitBtn.disabled = false;
+                if (currentLang === 'pl') {
+                    document.getElementById('btn-text-pl').textContent = "Dołącz do testów";
+                    alert("Coś poszło nie tak. Spróbuj ponownie później.");
+                } else {
+                    document.getElementById('btn-text-en').textContent = "Join the Playtests";
+                    alert("Something went wrong. Please try again later.");
+                }
+            });
+        });
     </script>
 
     <script>
+        // Kod efektu klimatycznej śnieżycy retro
         const canvas = document.getElementById('snowCanvas');
         const ctx = canvas.getContext('2d');
         
-        // Klasyczna niska rozdzielczość retro (320x240)
-        const retroWidth = 320;
-        const retroHeight = 240;
-        canvas.width = retroWidth;
-        canvas.height = retroHeight;
-
-        // Generowanie stałego tła miasta
-        const distantBuildings = [];
-        const midBuildings = [];
-        
-        // 1. Warstwa najdalsza (ciemniejsze sylwetki)
-        let dx = 0;
-        while (dx < retroWidth) {
-            let w = Math.floor(Math.random() * 25) + 15;
-            let h = Math.floor(Math.random() * 70) + 50;
-            distantBuildings.push({ x: dx, w: w, h: h });
-            dx += w - 2;
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
         }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
 
-        // 2. Warstwa bliższa (z pikselowymi oknami)
-        let mx = 0;
-        while (mx < retroWidth) {
-            let w = Math.floor(Math.random() * 35) + 20;
-            let h = Math.floor(Math.random() * 50) + 30;
-            
-            // Generowanie losowych okien w budynkach
-            let windows = [];
-            let rows = Math.floor(h / 12);
-            let cols = Math.floor(w / 8);
-            for (let r = 1; r < rows - 1; r++) {
-                for (let c = 1; c < cols - 1; c++) {
-                    if (Math.random() < 0.15) { // 15% szans na zapalone okno
-                        windows.push({
-                            relX: c * 8,
-                            relY: r * 12,
-                            color: Math.random() < 0.3 ? 'rgba(139, 0, 0, 0.5)' : 'rgba(100, 90, 60, 0.4)', // brudna czerwień lub zimny bursztyn
-                            flickerOffset: Math.random() * 100
-                        });
-                    }
-                }
-            }
-            midBuildings.push({ x: mx, w: w, h: h, windows: windows });
-            mx += w - 3;
-        }
-
-        // 3. Konfiguracja śniegu (płatki o różnej wielkości i głębi)
-        const numFlakes = 75;
+        const numFlakes = 280; 
         const flakes = [];
+        
         for (let i = 0; i < numFlakes; i++) {
+            const depth = Math.random() * 0.9 + 0.1; 
+            
             flakes.push({
-                x: Math.random() * retroWidth,
-                y: Math.random() * retroHeight,
-                size: Math.random() < 0.15 ? 3 : (Math.random() < 0.4 ? 2 : 1), // Różne rozmiary płatków (głębia)
-                speed: Math.random() * 0.4 + 0.15,
-                driftSpeed: Math.random() * 0.02 + 0.01,
-                driftOffset: Math.random() * 100
+                x: Math.random() * window.innerWidth,
+                y: Math.random() * window.innerHeight,
+                depth: depth,
+                size: depth * 6 + 1.2, 
+                speed: depth * 2.2 + 0.5, 
+                driftSpeed: Math.random() * 0.015 + 0.005,
+                driftOffset: Math.random() * 100,
+                opacity: depth * 0.6 + 0.15 
             });
         }
 
@@ -228,56 +432,39 @@
 
         function draw() {
             frameCount++;
-            
-            // Czyste tło nieba
-            ctx.fillStyle = '#030305';
-            ctx.fillRect(0, 0, retroWidth, retroHeight);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Rysowanie dalekiej warstwy miasta
-            ctx.fillStyle = '#0a0a0f';
-            for (let b of distantBuildings) {
-                ctx.fillRect(b.x, retroHeight - b.h, b.w, b.h);
-            }
-
-            // Rysowanie bliższej warstwy miasta + okna
-            for (let b of midBuildings) {
-                ctx.fillStyle = '#101016';
-                ctx.fillRect(b.x, retroHeight - b.h, b.w, b.h);
-
-                // Okna
-                for (let w of b.windows) {
-                    let flicker = Math.sin(frameCount * 0.05 + w.flickerOffset);
-                    if (flicker > -0.7) { // Delikatne migotanie świateł
-                        ctx.fillStyle = w.color;
-                        ctx.fillRect(b.x + w.relX, (retroHeight - b.h) + w.relY, 2, 2);
-                    }
-                }
-            }
-
-            // Dodanie gęstej mgły na dole (gradient)
-            let fog = ctx.createLinearGradient(0, 100, 0, retroHeight);
-            fog.addColorStop(0, 'rgba(3, 3, 5, 0)');
-            fog.addColorStop(0.6, 'rgba(3, 3, 5, 0.5)');
-            fog.addColorStop(1, '#020202');
+            let fog = ctx.createLinearGradient(0, canvas.height * 0.4, 0, canvas.height);
+            fog.addColorStop(0, 'rgba(2, 2, 2, 0)');
+            fog.addColorStop(0.6, 'rgba(2, 2, 2, 0.4)');
+            fog.addColorStop(1, 'rgba(2, 2, 2, 0.9)');
             ctx.fillStyle = fog;
-            ctx.fillRect(0, 100, retroWidth, retroHeight - 100);
+            ctx.fillRect(0, canvas.height * 0.4, canvas.width, canvas.height * 0.6);
 
-            // Rysowanie i ruch płatków śniegu
-            ctx.fillStyle = 'rgba(200, 200, 210, 0.8)';
             for (let f of flakes) {
-                ctx.fillRect(Math.floor(f.x), Math.floor(f.y), f.size, f.size);
+                const x = f.x;
+                const y = f.y;
+                const radius = f.size / 2;
+
+                let flakeGradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+                flakeGradient.addColorStop(0, `rgba(255, 255, 255, ${f.opacity})`);
+                flakeGradient.addColorStop(0.4, `rgba(255, 255, 255, ${f.opacity * 0.5})`);
+                flakeGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+                ctx.fillStyle = flakeGradient;
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fill();
 
                 f.y += f.speed;
-                // Bujanie płatków na wietrze (sinusoida)
-                f.x += Math.sin(frameCount * f.driftSpeed + f.driftOffset) * 0.15;
+                f.x += Math.sin(frameCount * f.driftSpeed + f.driftOffset) * 0.5;
 
-                // Reset, gdy płatek spadnie pod ekran
-                if (f.y > retroHeight) {
-                    f.y = -5;
-                    f.x = Math.random() * retroWidth;
+                if (f.y > canvas.height) {
+                    f.y = -10;
+                    f.x = Math.random() * canvas.width;
                 }
-                if (f.x > retroWidth) f.x = 0;
-                if (f.x < 0) f.x = retroWidth;
+                if (f.x > canvas.width) f.x = 0;
+                if (f.x < 0) f.x = canvas.width;
             }
 
             requestAnimationFrame(draw);
