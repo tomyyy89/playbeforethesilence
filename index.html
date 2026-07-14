@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Play Before The Silence</title>
     <style>
-        /* Tło i ogólny układ */
         body {
             background-color: #020202;
             color: #c4c4c4;
@@ -20,7 +19,36 @@
             position: relative;
         }
 
-        /* Pikselowy śnieg w tle (Nearest Neighbor) */
+        /* Przełącznik języków w rogu */
+        .language-switcher {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            z-index: 10;
+            display: flex;
+            gap: 15px;
+        }
+
+        .lang-btn {
+            color: #444;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            transition: color 0.2s ease;
+            user-select: none;
+        }
+
+        .lang-btn:hover {
+            color: #8b0000;
+        }
+
+        .lang-btn.active {
+            color: #990000;
+            text-shadow: 0 0 5px rgba(153, 0, 0, 0.6);
+        }
+
+        /* Pikselowy canvas na pełny ekran (Nearest Neighbor) */
         canvas {
             position: absolute;
             top: 0;
@@ -32,7 +60,7 @@
             image-rendering: crisp-edges;
         }
 
-        /* Filtr starego monitora kineskopowego CRT */
+        /* Filtr kineskopu CRT */
         .crt-overlay {
             position: absolute;
             top: 0;
@@ -46,7 +74,6 @@
             pointer-events: none;
         }
 
-        /* Delikatne migotanie ekranu */
         @keyframes flicker {
             0% { opacity: 0.98; }
             50% { opacity: 1; }
@@ -61,7 +88,6 @@
             animation: flicker 0.15s infinite;
         }
 
-        /* Krwistoczerwony nagłówek */
         h1 {
             font-size: 2.8rem;
             color: #990000;
@@ -98,60 +124,157 @@
 </head>
 <body>
 
+    <div class="language-switcher">
+        <span id="btn-pl" class="lang-btn" onclick="setLanguage('pl')">[ PL ]</span>
+        <span id="btn-en" class="lang-btn active" onclick="setLanguage('en')">[ EN ]</span>
+    </div>
+
     <canvas id="snowCanvas"></canvas>
     <div class="crt-overlay"></div>
 
     <div class="container">
         <h1>Before the Silence</h1>
-        <p>A disturbing psychological retro horror in the style of PS1. Darkness, choking fog, and secrets that were never meant to be uncovered. Demo is coming. Sign up to get a key for the closed playtests.</p>
+        
+        <p id="text-en">A disturbing psychological retro horror in the style of PS1. Darkness, choking fog, and secrets that were never meant to be uncovered. Demo is coming. Sign up to get a key for the closed playtests.</p>
+        <p id="text-pl" style="display: none;">Niepokojący retro horror psychologiczny w stylu PS1. Ciemność, duszna mgła i sekrety, których nikt nie miał odkryć. Demo nadchodzi. Zapisz się, aby otrzymać klucz do zamkniętych testów.</p>
         
         <div class="form-container">
-            <div class="placeholder-box">
+            <div id="box-en" class="placeholder-box">
                 [ PLAYER REGISTRATION SYSTEM - SECURE CONNECTION ]
+            </div>
+            <div id="box-pl" class="placeholder-box" style="display: none;">
+                [ SYSTEM REJESTRACJI GRACZY - BEZPIECZNE POŁĄCZENIE ]
             </div>
         </div>
     </div>
 
-    <!-- Skrypt generujący ostry, pikselowy śnieg -->
+    <script>
+        function setLanguage(lang) {
+            document.getElementById('btn-pl').classList.toggle('active', lang === 'pl');
+            document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+
+            document.getElementById('text-pl').style.display = lang === 'pl' ? 'block' : 'none';
+            document.getElementById('text-en').style.display = lang === 'en' ? 'block' : 'none';
+
+            document.getElementById('box-pl').style.display = lang === 'pl' ? 'block' : 'none';
+            document.getElementById('box-en').style.display = lang === 'en' ? 'block' : 'none';
+        }
+    </script>
+
     <script>
         const canvas = document.getElementById('snowCanvas');
         const ctx = canvas.getContext('2d');
         
-        // Celowo niska rozdzielczość dla ostrej pikselozy
+        // Klasyczna niska rozdzielczość retro (320x240)
         const retroWidth = 320;
         const retroHeight = 240;
         canvas.width = retroWidth;
         canvas.height = retroHeight;
 
-        const numFlakes = 60;
-        const flakes = [];
+        // Generowanie stałego tła miasta
+        const distantBuildings = [];
+        const midBuildings = [];
+        
+        // 1. Warstwa najdalsza (ciemniejsze sylwetki)
+        let dx = 0;
+        while (dx < retroWidth) {
+            let w = Math.floor(Math.random() * 25) + 15;
+            let h = Math.floor(Math.random() * 70) + 50;
+            distantBuildings.push({ x: dx, w: w, h: h });
+            dx += w - 2;
+        }
 
+        // 2. Warstwa bliższa (z pikselowymi oknami)
+        let mx = 0;
+        while (mx < retroWidth) {
+            let w = Math.floor(Math.random() * 35) + 20;
+            let h = Math.floor(Math.random() * 50) + 30;
+            
+            // Generowanie losowych okien w budynkach
+            let windows = [];
+            let rows = Math.floor(h / 12);
+            let cols = Math.floor(w / 8);
+            for (let r = 1; r < rows - 1; r++) {
+                for (let c = 1; c < cols - 1; c++) {
+                    if (Math.random() < 0.15) { // 15% szans na zapalone okno
+                        windows.push({
+                            relX: c * 8,
+                            relY: r * 12,
+                            color: Math.random() < 0.3 ? 'rgba(139, 0, 0, 0.5)' : 'rgba(100, 90, 60, 0.4)', // brudna czerwień lub zimny bursztyn
+                            flickerOffset: Math.random() * 100
+                        });
+                    }
+                }
+            }
+            midBuildings.push({ x: mx, w: w, h: h, windows: windows });
+            mx += w - 3;
+        }
+
+        // 3. Konfiguracja śniegu (płatki o różnej wielkości i głębi)
+        const numFlakes = 75;
+        const flakes = [];
         for (let i = 0; i < numFlakes; i++) {
             flakes.push({
                 x: Math.random() * retroWidth,
                 y: Math.random() * retroHeight,
-                size: Math.random() < 0.2 ? 2 : 1, // Piksele 1x1 lub 2x2
-                speed: Math.random() * 0.5 + 0.2,
-                drift: Math.random() * 0.3 - 0.15
+                size: Math.random() < 0.15 ? 3 : (Math.random() < 0.4 ? 2 : 1), // Różne rozmiary płatków (głębia)
+                speed: Math.random() * 0.4 + 0.15,
+                driftSpeed: Math.random() * 0.02 + 0.01,
+                driftOffset: Math.random() * 100
             });
         }
 
+        let frameCount = 0;
+
         function draw() {
-            ctx.fillStyle = '#020202';
+            frameCount++;
+            
+            // Czyste tło nieba
+            ctx.fillStyle = '#030305';
             ctx.fillRect(0, 0, retroWidth, retroHeight);
 
-            ctx.fillStyle = 'rgba(150, 150, 150, 0.75)';
+            // Rysowanie dalekiej warstwy miasta
+            ctx.fillStyle = '#0a0a0f';
+            for (let b of distantBuildings) {
+                ctx.fillRect(b.x, retroHeight - b.h, b.w, b.h);
+            }
 
-            for (let i = 0; i < numFlakes; i++) {
-                const f = flakes[i];
+            // Rysowanie bliższej warstwy miasta + okna
+            for (let b of midBuildings) {
+                ctx.fillStyle = '#101016';
+                ctx.fillRect(b.x, retroHeight - b.h, b.w, b.h);
+
+                // Okna
+                for (let w of b.windows) {
+                    let flicker = Math.sin(frameCount * 0.05 + w.flickerOffset);
+                    if (flicker > -0.7) { // Delikatne migotanie świateł
+                        ctx.fillStyle = w.color;
+                        ctx.fillRect(b.x + w.relX, (retroHeight - b.h) + w.relY, 2, 2);
+                    }
+                }
+            }
+
+            // Dodanie gęstej mgły na dole (gradient)
+            let fog = ctx.createLinearGradient(0, 100, 0, retroHeight);
+            fog.addColorStop(0, 'rgba(3, 3, 5, 0)');
+            fog.addColorStop(0.6, 'rgba(3, 3, 5, 0.5)');
+            fog.addColorStop(1, '#020202');
+            ctx.fillStyle = fog;
+            ctx.fillRect(0, 100, retroWidth, retroHeight - 100);
+
+            // Rysowanie i ruch płatków śniegu
+            ctx.fillStyle = 'rgba(200, 200, 210, 0.8)';
+            for (let f of flakes) {
                 ctx.fillRect(Math.floor(f.x), Math.floor(f.y), f.size, f.size);
 
                 f.y += f.speed;
-                f.x += f.drift;
+                // Bujanie płatków na wietrze (sinusoida)
+                f.x += Math.sin(frameCount * f.driftSpeed + f.driftOffset) * 0.15;
 
+                // Reset, gdy płatek spadnie pod ekran
                 if (f.y > retroHeight) {
-                    flakes[i].y = -5;
-                    flakes[i].x = Math.random() * retroWidth;
+                    f.y = -5;
+                    f.x = Math.random() * retroWidth;
                 }
                 if (f.x > retroWidth) f.x = 0;
                 if (f.x < 0) f.x = retroWidth;
