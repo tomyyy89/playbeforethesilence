@@ -256,10 +256,8 @@
         <p id="text-pl" style="display: none;">Niepokojący retro thriller psychologiczny w stylu PS1. Ciemność, duszna mgła i sekrety, których nikt nie miał odkryć. Demo nadchodzi. Zapisz się, aby otrzymać klucz do zamkniętych testów.</p>
         
         <div class="form-container">
-            <!-- Formularz zapisu -->
-            <form action="https://assets.mailerlite.com/jsonp/976090/forms/192995024514843667/subscribe" method="POST" id="signup-form">
+            <form method="POST" id="signup-form">
                 
-                <!-- PUŁAPKA HONEYPOT: Całkowicie niewidoczna dla ludzi, boty ją wypełnią -->
                 <div style="display: none !important;">
                     <input type="text" name="website" id="honeypot_field" tabindex="-1" autocomplete="off">
                 </div>
@@ -287,7 +285,6 @@
                 </button>
             </form>
 
-            <!-- Ekran sukcesu -->
             <div id="success-message" class="success-container">
                 <div class="success-title" id="success-title-text">Welcome to the fog</div>
                 <div class="success-text" id="success-desc-text">You have successfully joined the playtest list. Watch your inbox for incoming secrets...</div>
@@ -296,7 +293,7 @@
     </div>
 
     <script>
-        // Oficjalne i bezpośrednie linki wysyłki z Twoich formularzy MailerLite
+        // Oficjalne linki wysyłki do MailerLite
         const ACTION_EN = "https://assets.mailerlite.com/jsonp/976090/forms/192995024514843667/subscribe";
         const ACTION_PL = "https://assets.mailerlite.com/jsonp/976090/forms/192994438696404880/subscribe";
         
@@ -323,10 +320,6 @@
             // Tekst na przycisku
             document.getElementById('btn-text-pl').style.display = lang === 'pl' ? 'block' : 'none';
             document.getElementById('btn-text-en').style.display = lang === 'en' ? 'block' : 'none';
-
-            // Dynamiczna zmiana celu wysyłki MailerLite
-            const form = document.getElementById('signup-form');
-            form.action = lang === 'pl' ? ACTION_PL : ACTION_EN;
         }
 
         // Integracja wysyłki z wykrywaniem botów (Honeypot)
@@ -342,7 +335,6 @@
             
             if (honeypot !== "") {
                 console.warn("Spam-bot detected! Aborting transmission.");
-                // Oszukujemy bota - chowamy form, pokazujemy sukces, ale NIC nie wysyłamy do bazy
                 form.style.display = 'none';
                 
                 if (currentLang === 'pl') {
@@ -366,10 +358,13 @@
 
             const formData = new FormData(form);
             
-            fetch(form.action, {
+            // Określamy cel wysyłki bezpośrednio na podstawie wybranego języka
+            const targetAction = (currentLang === 'pl') ? ACTION_PL : ACTION_EN;
+            
+            fetch(targetAction, {
                 method: 'POST',
                 body: formData,
-                mode: 'no-cors' // Pozwala ominąć politykę CORS przy bezpośrednim uderzeniu do JSONP w MailerLite
+                mode: 'no-cors' 
             })
             .then(() => {
                 form.style.display = 'none';
